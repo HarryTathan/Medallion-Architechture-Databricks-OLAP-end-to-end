@@ -4,7 +4,7 @@
 ![Tech Stack](https://img.shields.io/badge/Stack-Pyspark%20|%20Databricks%20|%20Spark%20SQL%20|%20Python-blue)
 
 # 📖 Project Overview
-This project implements a production-grade **Lakehouse Architecture** using **Apache Spark** and **Databricks**. It simulates a real-world data pipeline that ingests raw sales data, processes it through a **Medallion Architecture** (Bronze, Silver, Gold), and models it into a **Star Schema** for OLAP reporting.
+This project implements a production-grade **Lakehouse Architecture** using **Apache Spark** and **Databricks**. It simulates a real-world data pipeline that ingests raw sales data, processes it through a **Medallion Architecture** (Bronze, Silver, Gold), **ELT - Extract, Load, Transform approach**, and models it into a **Star Schema** for **OLAP reporting**.
 
 The pipeline is designed to be **idempotent**, **fault-tolerant**, and handles **incremental loading** with **Slowly Changing Dimensions (SCD Type 1)**.
 
@@ -49,6 +49,16 @@ The Gold layer is modeled as a classic Star Schema for optimal performance in to
 
 ---
 
+# ELT Strategy (Extract, Load, Transform)
+Unlike traditional ETL pipelines that transform data before loading, this project utilizes an **ELT pattern** optimized for the Cloud.
+
+1.  **Extract & Load:** Raw data is extracted from the source and is dumped directly into the **Bronze Layer** (Delta Lake) in its native format.
+2.  **Transform:** Transformation logic (Data Quality, Deduplication, Star Schema modeling) is applied downstream using the compute power of **Apache Spark**.
+   
+    **Benefit (In case of a persistent bronze layer):** If business logic changes, we can re-process the Silver/Gold layers from the **persistent Bronze** data without re-querying the source system.
+
+--- 
+
 # 🚀 Key Technical Challenges Solved
 
 ### 1. The "Reset Loop" Bug
@@ -67,6 +77,8 @@ The Gold layer is modeled as a classic Star Schema for optimal performance in to
 **Solution:** Implemented **Idempotent Merges** for the Fact table. The pipeline checks if an `order_id` exists before inserting, making the pipeline safe to run multiple times.
 
 ---
+
+
 
 # 💻 Code Snippets
 ## Handling SCD - Type 1. (Slowly Changing Dimensions.)
@@ -122,7 +134,7 @@ WHEN NOT MATCHED THEN
 
 
 
-## Updating Fact Table Incrementally
+### Updating Fact Table Incrementally
 
 ```python
 %python
